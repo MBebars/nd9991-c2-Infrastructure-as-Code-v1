@@ -14,16 +14,16 @@ Resources:
     Properties:
         GroupDescription: Allow http to our test host
         VpcId:
-          Ref: myVPC
+          !Ref myVPC
         SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
         SecurityGroupEgress:
-        - IpProtocol: -1
-          FromPort: -1
-          ToPort: -1
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
           CidrIp: 0.0.0.0/0
   myWebServerInstance: 
     Type: AWS::EC2::Instance
@@ -31,15 +31,17 @@ Resources:
       InstanceType: t3.micro
       ImageId: !Ref AMItoUse
       NetworkInterfaces: 
-        - AssociatePublicIpAddress: "true"
+        - AssociatePublicIpAddress: true
           DeviceIndex: "0"
           GroupSet: 
-            - Ref: "myWebAccessSecurityGroup"
+            - !Ref "myWebAccessSecurityGroup"
           SubnetId: 
-            Ref: "PublicSubnet"
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          yum update -y
-          yum install -y httpd
-          systemctl start httpd
+            !Ref "PublicSubnet"
+#      UserData:
+#        Fn::Base64: !Sub |
+#            #!/bin/bash
+#            sudo yum update -y
+#            sudo yum install -y httpd.x86_64
+#            sudo systemctl start httpd.service
+#            sudo systemctl enable httpd.service
+#            sudo echo ?Hello World from $(hostname -f)? > /var/www/html/index.html
